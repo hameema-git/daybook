@@ -3,20 +3,20 @@
 <html lang="en">
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- For Android Chrome -->
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="application-name" content="DayBook">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="DayBook">
+  <meta name="theme-color" content="#000000">
   <title>Day Book</title>
-  
-  <!-- Bootstrap CSS -->
+
+  <!-- Bootstrap CSS & Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  
-  <!-- ✅ PWA Manifest and Theme Color -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- PWA Manifest -->
   <link rel="manifest" href="{% static 'manifest.json' %}">
   <link rel="icon" type="image/png" href="{% static 'icons/icon-192x192.png' %}">
-  <meta name="theme-color" content="#000000">
 
-  <!-- ✅ Service Worker Registration -->
+  <!-- Service Worker -->
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register("{% static 'sw.js' %}")
@@ -24,57 +24,159 @@
         .catch(err => console.error("❌ SW registration failed:", err));
     }
   </script>
-</head>
-<body class="container mt-4">
 
-  <h3>Day Book Summary</h3>
-  <p><strong>Income:</strong> ₹{{ income }}</p>
-  <p><strong>Expense:</strong> ₹{{ expense }}</p>
-  <p><strong>Balance:</strong> ₹{{ balance }}</p>
-  
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-weight: 500;
+    }
+
+    .summary-card {
+      border: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s ease;
+    }
+
+    .summary-card:hover {
+      transform: translateY(-3px);
+    }
+
+    .summary-card h5 {
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+
+    .table thead {
+      background: linear-gradient(to right, #0d6efd, #0b5ed7);
+      color: white;
+    }
+
+    .table th, .table td {
+      vertical-align: middle;
+    }
+
+    .table th {
+      font-weight: bold;
+    }
+
+    .btn-primary {
+      background-color: #0d6efd;
+      border: none;
+    }
+
+    .btn-outline-primary:hover {
+      background-color: #0d6efd;
+      color: white;
+    }
+
+    .btn-danger i {
+      pointer-events: none;
+    }
+
+    .table-success {
+      background-color: #d4edda !important;
+    }
+
+    .table-danger {
+      background-color: #f8d7da !important;
+    }
+  </style>
+</head>
+<body class="container py-4">
+
+  <!-- Title -->
+  <div class="text-center mb-4">
+    <h2 class="fw-bold text-primary">📘 Day Book Summary</h2>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="row text-center mb-4">
+    <div class="col-md-4 mb-3">
+      <div class="card summary-card">
+        <div class="card-body">
+          <h5 class="card-title text-success">Income</h5>
+          <p class="card-text fs-5">₹{{ income }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 mb-3">
+      <div class="card summary-card">
+        <div class="card-body">
+          <h5 class="card-title text-danger">Expense</h5>
+          <p class="card-text fs-5">₹{{ expense }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 mb-3">
+      <div class="card summary-card">
+        <div class="card-body">
+          <h5 class="card-title text-primary">Balance</h5>
+          <p class="card-text fs-5">₹{{ balance }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Add Entry Button -->
-  <a href="{% url 'add_entry' %}" class="btn btn-primary mb-3">+ Add Entry</a>
-  
+  <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-3">
+    <a href="{% url 'add_entry' %}" class="btn btn-primary px-4">
+      <i class="bi bi-plus-circle me-1"></i> Add Entry
+    </a>
+  </div>
+
   <!-- Search by Date -->
-  <form method="GET" class="mb-3">
-    <div class="input-group">
-      <input type="date" class="form-control" name="date_filter" value="{{ date_filter }}" placeholder="Search by Date">
-      <button class="btn btn-outline-secondary" type="submit">Search</button>
+  <form method="GET" class="mb-4">
+    <div class="row g-2">
+      <div class="col-md-10 col-8">
+        <input type="date" class="form-control" name="date_filter" value="{{ date_filter }}">
+      </div>
+      <div class="col-md-2 col-4">
+        <button class="btn btn-outline-primary w-100" type="submit">
+          <i class="bi bi-search me-1"></i>Search
+        </button>
+      </div>
     </div>
   </form>
 
-  <!-- Table for Entries -->
-  <table class="table table-bordered table-striped">
-    <thead class="table-light">
-      <tr>
-        <th>Date</th>
-        <th>Amount</th>
-        <th>Category</th>
-        <th>Type</th>
-        <th>Note</th>
-        <th>Action</th> <!-- New -->
-      </tr>
-    </thead>
-    <tbody>
-      {% for entry in entries %}
-      <tr>
-        <td>{{ entry.date }}</td>
-        <td>₹{{ entry.amount }}</td>
-        <td>{{ entry.category }}</td>
-        <td>{{ entry.type }}</td>
-        <td>{{ entry.note }}</td>
-        <td>
-          <form method="POST" action="{% url 'delete_entry' entry.id %}" onsubmit="return confirm('Are you sure you want to delete this entry?');">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-          </form>
-        </td>
-      </tr>
-      {% empty %}
-        <tr><td colspan="6" class="text-center">No entries found for this date</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <!-- Entries Table -->
+  <div class="table-responsive">
+    <table class="table table-bordered align-middle text-center shadow-sm bg-white">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Amount</th>
+          <th>Category</th>
+          <th>Type</th>
+          <th>Note</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in entries %}
+          <tr class="{% if entry.type == 'Income' %}table-success{% elif entry.type == 'Expense' %}table-danger{% endif %}">
+            <td>{{ entry.date }}</td>
+            <td>₹{{ entry.amount }}</td>
+            <td>{{ entry.category }}</td>
+            <td>{{ entry.type }}</td>
+            <td>{{ entry.note }}</td>
+            <td>
+              <form method="POST" action="{% url 'delete_entry' entry.id %}" onsubmit="return confirm('Are you sure you want to delete this entry?');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                  <i class="bi bi-trash-fill"></i>
+                </button>
+              </form>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="6" class="text-muted">No entries found for this date</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 
 </body>
 </html>
+
