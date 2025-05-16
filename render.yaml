@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: django-app
+    env: python
+    buildCommand: |
+      pip install -r requirements.txt
+      python manage.py collectstatic --noinput
+      python manage.py migrate
+    startCommand: "gunicorn daybook.wsgi:application --bind 0.0.0.0:8000"
+    plan: free
+    branch: main
+

@@ -5,7 +5,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-secret-key'
 
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*','Daybook.onrender.com']
 
@@ -28,7 +28,12 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # <- add here
 ]
+
+
+
+
 
 ROOT_URLCONF = 'daybook.urls'
 
@@ -71,6 +76,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # STATIC_ROOT = BASE_DIR / 'staticfiles'  # For collecting static files when deploying
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [BASE_DIR / 'static']  # The location of your static files
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 PWA_SERVICE_WORKER_PATH = BASE_DIR / 'static/sw.js'
 

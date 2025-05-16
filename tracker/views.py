@@ -4,6 +4,7 @@ from django.db.models import Sum
 from datetime import date
 from django.core.paginator import Paginator
 from datetime import datetime, date
+from django.shortcuts import redirect, get_object_or_404
 
 def dashboard(request):
     date_filter = request.GET.get('date_filter', None)
@@ -84,3 +85,12 @@ def add_entry(request):
         return redirect('dashboard')
 
     return render(request, 'tracker/add_entry.html', {'today_date': date.today()})
+
+
+def delete_entry(request, entry_id):
+    entry = get_object_or_404(Entry, id=entry_id)
+    if request.method == "POST":
+        entry.delete()
+        return redirect('dashboard')  # or your main page url name
+    # Optional: Render a confirmation page if GET request
+    return render(request, 'tracker/confirm_delete.html', {'entry': entry})
